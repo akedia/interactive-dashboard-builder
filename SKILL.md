@@ -647,3 +647,157 @@ const LTV_DATA = [
 - ARPPU = total_revenue / paying_users
 - Paying Conversion = paying_users / DAU
 - 7-day Moving Average for trend smoothing
+
+---
+
+## Export Functionality Patterns
+
+Use these patterns when users need to download dashboard data or save chart images for presentations and reports.
+
+### CSV Export
+
+Converts filtered table data to a CSV file and triggers a browser download. Handles values containing commas by wrapping them in quotes.
+
+```javascript
+function exportCSV(data, columns, filename) {
+    const header = columns.map(c => c.label).join(',');
+    const rows = data.map(row =>
+        columns.map(c => {
+            const val = row[c.field];
+            return typeof val === 'string' && val.includes(',') ? `"${val}"` : val;
+        }).join(',')
+    );
+    const csv = [header, ...rows].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = filename || 'export.csv';
+    a.click(); URL.revokeObjectURL(url);
+}
+```
+
+### PNG Chart Export
+
+Exports a Chart.js chart instance as a PNG image. Useful for embedding charts in slides or documents.
+
+```javascript
+function exportChartPNG(chartInstance, filename) {
+    const url = chartInstance.toBase64Image('image/png', 1);
+    const a = document.createElement('a');
+    a.href = url; a.download = filename || 'chart.png';
+    a.click();
+}
+```
+
+### Export Button HTML
+
+Add export buttons to the filter bar or table header:
+
+```html
+<div class="export-group">
+  <button class="export-btn" onclick="exportCSV(dashboard.filteredData, columns, 'report.csv')">
+    &#128190; Export CSV
+  </button>
+  <button class="export-btn" onclick="exportChartPNG(dashboard.charts.line, 'trend.png')">
+    &#128247; Export Chart
+  </button>
+</div>
+```
+
+---
+
+## Table Pagination Pattern
+
+Use this when a table has more than 100 rows. Renders data in pages with navigation controls showing "Showing 1-50 of 2,340" with prev/next buttons.
+
+```javascript
+class PaginatedTable {
+    constructor(containerId, data, columns, pageSize = 50) {
+        this.containerId = containerId;
+        this.data = data;
+        this.columns = columns;
+        this.pageSize = pageSize;
+        this.currentPage = 1;
+        this.totalPages = Math.ceil(data.length / pageSize);
+        this.renderPage();
+    }
+
+    setData(newData) {
+        this.data = newData;
+        this.currentPage = 1;
+        this.totalPages = Math.ceil(newData.length / this.pageSize);
+        this.renderPage();
+    }
+
+    renderPage() {
+        const start = (this.currentPage - 1) * this.pageSize;
+        const end = Math.min(start + this.pageSize, this.data.length);
+        const pageData = this.data.slice(start, end);
+
+        const formatVal = (val, fmt) => {
+            if (fmt === 'currency') return '$' + val.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            if (fmt === 'number') return val.toLocaleString();
+            if (fmt === 'percent') return (val * 100).toFixed(1) + '%';
+            return val;
+        };
+
+        const tableHTML = `
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        ${this.columns.map(col => `<th>${col.label}</th>`).join('')}
+                    </tr>
+                </thead>
+                <tbody>
+                    ${pageData.map(row => `
+                        <tr>
+                            ${this.columns.map(col => {
+                                const val = col.compute ? col.compute(row) : row[col.field];
+                                return `<td>${formatVal(val, col.format)}</td>`;
+                            }).join('')}
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        `;
+
+        document.getElementById(this.containerId).innerHTML = tableHTML + this.renderPagination(start, end);
+    }
+
+    renderPagination(start, end) {
+        return `
+            <div class="pagination">
+                <button class="pagination-btn" onclick="paginatedTable.goToPage(${this.currentPage - 1})"
+                        ${this.currentPage <= 1 ? 'disabled' : ''}>
+                    &#8592; Prev
+                </button>
+                <span class="pagination-info">
+                    Showing ${(start + 1).toLocaleString()}-${end.toLocaleString()} of ${this.data.length.toLocaleString()}
+                </span>
+                <button class="pagination-btn" onclick="paginatedTable.goToPage(${this.currentPage + 1})"
+                        ${this.currentPage >= this.totalPages ? 'disabled' : ''}>
+                    Next &#8594;
+                </button>
+            </div>
+        `;
+    }
+
+    goToPage(page) {
+        if (page < 1 || page > this.totalPages) return;
+        this.currentPage = page;
+        this.renderPage();
+    }
+}
+
+// Usage
+const columns = [
+    { field: 'date', label: 'Date' },
+    { field: 'channel', label: 'Channel' },
+    { field: 'installs', label: 'Installs', format: 'number' },
+    { field: 'spend', label: 'Spend', format: 'currency' },
+];
+const paginatedTable = new PaginatedTable('dataTable', dashboard.filteredData, columns, 50);
+
+// When filters change, update the table:
+// paginatedTable.setData(dashboard.filteredData);
+```

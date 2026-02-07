@@ -739,6 +739,60 @@ html.dark .loading-overlay {
 
 ---
 
+## Component: Export Buttons
+
+Style export buttons for CSV/PNG downloads. Place them in the filter bar or table header.
+
+```css
+.export-group {
+  display: flex;
+  gap: var(--spacing-sm);
+  margin-left: auto;
+  align-items: center;
+}
+
+.export-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  font-family: var(--font-family);
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+  white-space: nowrap;
+}
+
+.export-btn:hover {
+  background: var(--bg-hover);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.export-btn:active {
+  transform: scale(0.97);
+}
+```
+
+### HTML Usage
+```html
+<!-- Inside filter-bar or table-container header -->
+<div class="export-group">
+  <button class="export-btn" onclick="exportCSV(dashboard.filteredData, columns, 'report.csv')">
+    &#128190; Export CSV
+  </button>
+  <button class="export-btn" onclick="exportChartPNG(dashboard.charts.line, 'trend.png')">
+    &#128247; Export Chart
+  </button>
+</div>
+```
+
+---
+
 ## Complete Minimal Stylesheet
 
 Copy this as a starting point for any dashboard:

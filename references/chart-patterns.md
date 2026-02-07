@@ -275,29 +275,75 @@ const chart = createDoughnutChart('spendDist', channels, spendValues, {
 ```
 
 ### Center Text Plugin (for Doughnut)
+
+Renders configurable text in the center of doughnut charts. Supports a main text line and a smaller subtext line. Configure via `chart.options.plugins.centerText`.
+
 ```javascript
-// Add total in the center of a doughnut chart
 const centerTextPlugin = {
   id: 'centerText',
-  afterDraw(chart) {
+  beforeDraw(chart) {
     if (chart.config.type !== 'doughnut') return;
+    const centerOpts = chart.options.plugins.centerText;
+    if (!centerOpts) return;
+
     const { ctx, width, height } = chart;
-    const total = chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+    const text = centerOpts.text || '';
+    const subtext = centerOpts.subtext || '';
+    const fontFamily = centerOpts.fontFamily || '-apple-system, BlinkMacSystemFont, sans-serif';
+    const mainFontSize = centerOpts.fontSize || 24;
+
     ctx.save();
-    ctx.font = 'bold 24px -apple-system, sans-serif';
-    ctx.fillStyle = '#1F2937';
+
+    // Main text
+    ctx.font = `bold ${mainFontSize}px ${fontFamily}`;
+    ctx.fillStyle = centerOpts.color || '#1F2937';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText('$' + (total / 1000).toFixed(1) + 'K', width / 2, height / 2 - 10);
-    ctx.font = '12px -apple-system, sans-serif';
-    ctx.fillStyle = '#6B7280';
-    ctx.fillText('Total Spend', width / 2, height / 2 + 14);
+    const centerX = width / 2;
+    const centerY = height / 2 - (subtext ? 10 : 0);
+    ctx.fillText(text, centerX, centerY);
+
+    // Subtext
+    if (subtext) {
+      ctx.font = `${centerOpts.subtextSize || 12}px ${fontFamily}`;
+      ctx.fillStyle = centerOpts.subtextColor || '#6B7280';
+      ctx.fillText(subtext, centerX, centerY + mainFontSize * 0.7);
+    }
+
     ctx.restore();
   }
 };
 
-// Register globally or per-chart
+// Register globally before creating any charts
 Chart.register(centerTextPlugin);
+```
+
+#### Usage: Static Text
+```javascript
+const chart = createDoughnutChart('spendChart', labels, values, {
+  valueFormat: v => '$' + v.toLocaleString()
+});
+chart.options.plugins.centerText = { text: '$24.5K', subtext: 'Total Spend' };
+chart.update();
+```
+
+#### Usage: Dynamic Total (auto-computed from data)
+```javascript
+const total = values.reduce((a, b) => a + b, 0);
+const chart = new Chart(ctx, {
+  type: 'doughnut',
+  data: { labels, datasets: [{ data: values, backgroundColor: COLORS }] },
+  options: {
+    plugins: {
+      centerText: {
+        text: '$' + (total / 1000).toFixed(1) + 'K',
+        subtext: 'Total Spend',
+        fontSize: 28,
+        color: '#1F2937'
+      }
+    }
+  }
+});
 ```
 
 ---
