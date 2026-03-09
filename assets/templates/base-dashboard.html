@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Title</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <style>
+    /* CSS variables and styles - see references/css-themes.md */
+  </style>
+</head>
+<body>
+  <div class="dashboard">
+    <header class="dashboard-header">
+      <div>
+        <h1>Dashboard Title</h1>
+        <p class="subtitle">Description or date range</p>
+      </div>
+      <span class="updated">Updated: <span id="lastUpdated"></span></span>
+    </header>
+
+    <div class="filter-bar" id="filterBar">
+      <!-- Filters go here -->
+    </div>
+
+    <div class="kpi-row" id="kpiRow">
+      <!-- KPI cards go here -->
+    </div>
+
+    <div class="chart-row">
+      <!-- Chart containers go here -->
+    </div>
+
+    <div class="table-container" id="dataTable">
+      <!-- Data table goes here -->
+    </div>
+  </div>
+
+  <script>
+    // 1. Embed data as JS constant:
+    // const RAW_DATA = [ { date: "2026-01-01", ... }, ... ];
+
+    // 2. Paste Dashboard class from dashboard-class.js
+
+    // 3. Initialize:
+    // const dashboard = new Dashboard(RAW_DATA);
+  </script>
+</body>
+</html>

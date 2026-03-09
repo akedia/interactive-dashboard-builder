@@ -561,3 +561,126 @@ Always include Chart.js from CDN in the HTML head:
 <!-- Optional: Date adapter for time-series axes -->
 <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
 ```
+
+---
+
+## Game Industry Dashboard Examples
+
+### Example 1: UA Performance Dashboard
+
+**Purpose**: Track user acquisition efficiency across channels and creatives.
+
+**KPIs**: Total Spend, Total Installs, Avg CPI, D7 ROAS, Active Campaigns
+
+**Charts**:
+- Line chart: Daily install volume by channel (stacked)
+- Bar chart: CPI comparison by channel
+- Doughnut: Spend distribution by channel
+
+**Filters**: Date range, Channel, Platform (iOS/Android), Country
+
+**Data structure**:
+```javascript
+const RAW_DATA = [
+  {
+    date: "2026-01-15", channel: "Google", platform: "Android", country: "US",
+    installs: 1200, spend: 3400, revenue_d7: 4200, impressions: 85000,
+    clicks: 4200, campaign: "winter_sale_v2"
+  },
+  // ...
+];
+```
+
+**Key computed metrics**:
+- CPI = spend / installs
+- CTR = clicks / impressions
+- CVR = installs / clicks
+- D7 ROAS = revenue_d7 / spend
+
+---
+
+### Example 2: Retention & Engagement Dashboard
+
+**Purpose**: Monitor player retention curves and engagement health.
+
+**KPIs**: DAU, D1 Retention, D7 Retention, D30 Retention, Avg Session Length, Stickiness (DAU/MAU)
+
+**Charts**:
+- Line chart: Retention curves (D1, D3, D7, D14, D30, D60, D90) by cohort
+- Line chart: DAU trend over time
+- Bar chart: Avg sessions per day by platform
+- Doughnut: DAU distribution by player segment
+
+**Filters**: Date range, Cohort week, Platform, Country
+
+**Data structure**:
+```javascript
+const COHORT_DATA = [
+  {
+    cohort_date: "2026-01-06", platform: "iOS", country: "US",
+    cohort_size: 5000,
+    d1: 0.42, d3: 0.28, d7: 0.18, d14: 0.12, d30: 0.08, d60: 0.05, d90: 0.03
+  },
+  // ...
+];
+
+const DAILY_DATA = [
+  {
+    date: "2026-01-15", platform: "iOS",
+    dau: 125000, wau: 310000, mau: 580000,
+    avg_sessions: 3.2, avg_session_length: 840, // seconds
+    new_users: 4200, returning_users: 120800
+  },
+  // ...
+];
+```
+
+**Key computed metrics**:
+- Stickiness = DAU / MAU
+- Avg Session Length (formatted as mm:ss)
+- Retention rate = retained_users / cohort_size
+
+---
+
+### Example 3: Revenue Dashboard
+
+**Purpose**: Track monetization performance and revenue trends.
+
+**KPIs**: Daily Revenue, ARPU, ARPPU, Paying Conversion Rate, LTV D30
+
+**Charts**:
+- Line chart: Daily revenue trend (with 7-day moving average)
+- Line chart: ARPU and ARPPU trend (dual axis)
+- Bar chart: Revenue by source (IAP, Ads, Subscription)
+- Doughnut: Revenue distribution by product/SKU
+
+**Filters**: Date range, Platform, Country, Revenue source
+
+**Data structure**:
+```javascript
+const REVENUE_DATA = [
+  {
+    date: "2026-01-15", platform: "iOS", country: "US",
+    dau: 125000, paying_users: 3750,
+    revenue_iap: 18500, revenue_ads: 4200, revenue_sub: 2800,
+    transactions: 5100, avg_transaction: 5.02
+  },
+  // ...
+];
+
+const LTV_DATA = [
+  {
+    cohort_date: "2025-12-01", platform: "iOS",
+    cohort_size: 8000, paying_users: 320,
+    ltv_d1: 0.12, ltv_d7: 0.85, ltv_d14: 1.42, ltv_d30: 2.15, ltv_d60: 3.10
+  },
+  // ...
+];
+```
+
+**Key computed metrics**:
+- Total Revenue = revenue_iap + revenue_ads + revenue_sub
+- ARPU = total_revenue / DAU
+- ARPPU = total_revenue / paying_users
+- Paying Conversion = paying_users / DAU
+- 7-day Moving Average for trend smoothing
